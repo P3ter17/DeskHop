@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservations</title>
+</head>
+<body>
+    <h1 style="font-family: Calibri">Reservations</h1>
+    {% for reservation in reservations %}
+        <div style="margin: 20px; border: 1.5px solid #ef4130; padding: 10px;border-radius: 15px">
+            <p style="font-family: Calibri">Reservation id:{{reservation.id}}</p>
+            <p style="font-family: Calibri">User id:{{reservation.user_id}}</p>
+            <p style="font-family: Calibri">Table id:{{reservation.table_id}}</p>
+            <p style="font-family: Calibri">Date: {{reservation.reservation_date}}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>
