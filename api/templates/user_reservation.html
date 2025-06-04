@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation</title>
+</head>
+<body>
+  <h1 style="font-family: Calibri">Tables</h1>
+    {% for table in tables %}
+        <div style="margin: 20px; border: 1.5px solid #ef4130; padding: 10px;border-radius: 15px">
+            <p style="font-family: Calibri">Table id:{{table.id}}</p>
+            <p style="font-family: Calibri">Table name:{{table.name}}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>

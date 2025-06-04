@@ -59,6 +59,19 @@ async def read_item(request: Request, session: SessionDep):
         request=request, name="reservations.html", context={"reservations": reservations}
     )
 
+@app.get("/web/admin/", response_class=HTMLResponse)
+async def read_item(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="admin.html"
+    )
+
+@app.get("/web/user_reservation/", response_class=HTMLResponse)
+async def read_item(request: Request, session: SessionDep):
+    tables = session.exec(select(Table)).all()
+    return templates.TemplateResponse(
+        request=request, name="user_reservation.html", context={"tables": tables}
+    )
+
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()

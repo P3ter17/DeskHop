@@ -1,10 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8">
+  <title>Admin</title>
 </head>
 <body>
+  <h1 style="font-family: Calibri">Admin page</h1>
+  <div>
+    <h2 style="font-family: Calibri">Create users</h2>
+    <form id="userForm">
+      <label for="username">Username:</label>
+      <input type="text" id="user_name" name="username" required>
+      <br>
+      <button type="submit">Create user</button>
+    </form>
+    <div>
+      <p>User ID: <span id="user_id"></span></p>
+      <p>Username: <span id="username"></span></p>
+    </div>
+    <script>
+      document.getElementById('userForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
+        const username = document.getElementById('user_name').value;
+
+        try {
+          const response = await fetch('http://127.0.0.1:8000/user/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error API: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('Answer from API:', data);
+
+          document.getElementById('user_id').innerText = data.id ?? 'N/A';
+          document.getElementById('username').innerText = data.username ?? 'N/A';
+
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      });
+    </script>
+  </div>
+  <div>
+    <h2 style="font-family: Calibri">Create tables</h2>
+    <form id="tableForm">
+      <label for="name">Name:</label>
+      <input type="text" id="table_name" name="name" required>
+      <br>
+      <button type="submit">Create table</button>
+    </form>
+    <div>
+      <p>Table ID: <span id="table_id"></span></p>
+      <p>Username: <span id="name"></span></p>
+    </div>
+    <script>
+      document.getElementById('tableForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('table_name').value;
+
+        try {
+          const response = await fetch('http://127.0.0.1:8000/table/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name })
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error API: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('Answer from API:', data);
+
+          document.getElementById('table_id').innerText = data.id ?? 'N/A';
+          document.getElementById('name').innerText = data.name ?? 'N/A';
+
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      });
+    </script>
+  </div>
+  <div>
+    <h2 style="font-family: Calibri">Create Reservations</h2>
+    <form id="reservationForm">
+      <label for="user_id">User ID:</label>
+      <input type="number" id="user_id_r" name="user_id" required>
+      <br>
+      <label for="table_id">Table ID:</label>
+      <input type="number" id="table_id_r" name="table_id" required>
+      <br>
+      <label for="date">Name:</label>
+      <input type="date" id="date_inf" name="date" required>
+      <br>
+      <button type="submit">Create reservation</button>
+    </form>
+    <div>
+      <p>Reservation ID: <span id="reservation_id"></span></p>
+      <p>User ID: <span id="user"></span></p>
+      <p>Table ID: <span id="table"></span></p>
+      <p>Date: <span id="date"></span></p>
+    </div>
+    <script>
+      document.getElementById('reservationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const user_id = document.getElementById('user_id_r').value;
+        const table_id = document.getElementById('table_id_r').value;
+        const reservation_date = document.getElementById('date_inf').value;
+
+        try {
+          const response = await fetch('http://127.0.0.1:8000/reservation/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user_id, table_id, reservation_date })
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error API: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('Answer from API:', data);
+
+          document.getElementById('reservation_id').innerText = data.id ?? 'N/A';
+          document.getElementById('user').innerText = data.user_id ?? 'N/A';
+          document.getElementById('table').innerText = data.table_id ?? 'N/A';
+          document.getElementById('date').innerText = data.reservation_date ?? 'N/A';
+
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      });
+    </script>
+  </div>
 </body>
 </html>
