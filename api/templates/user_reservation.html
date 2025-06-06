@@ -5,11 +5,19 @@
     <title>Reservation</title>
 </head>
 <body>
-  <h1 style="font-family: Calibri">Tables</h1>
+  <h1 style="font-family: Calibri">Table reservations for {{date}}</h1>
     {% for table in tables %}
         <div style="margin: 20px; border: 1.5px solid #ef4130; padding: 10px;border-radius: 15px">
             <p style="font-family: Calibri">Table id:{{table.id}}</p>
             <p style="font-family: Calibri">Table name:{{table.name}}</p>
+            <p style="font-family: Calibri">
+                Status:
+                {% if table.reserved %}
+                    <span style="color: red;">Reserved</span>
+                {% else %}
+                    <span style="color: green;">Available</span>
+                {% endif %}
+            </p>
         </div>
     {% endfor %}
 </body>

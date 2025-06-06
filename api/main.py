@@ -9,23 +9,23 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select
 from datetime import date, datetime
 
 
-
 class Reservation(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
     table_id: int = Field(foreign_key="table.id")
     reservation_date: date
+
+
 # "2025-06-04"
 
 class User(SQLModel, table=True):
-    id: int= Field(default=None, primary_key=True)
+    id: int = Field(default=None, primary_key=True)
     username: str
 
 
 class Table(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     name: str
-
 
 
 sqlite_file_name = "database.db"
@@ -38,10 +38,10 @@ engine = create_engine(sqlite_url, connect_args=connect_args)
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
+
 def get_session():
     with Session(engine) as session:
         yield session
-
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -59,23 +59,46 @@ async def read_item(request: Request, session: SessionDep):
         request=request, name="reservations.html", context={"reservations": reservations}
     )
 
+
 @app.get("/web/admin/", response_class=HTMLResponse)
 async def read_item(request: Request):
     return templates.TemplateResponse(
         request=request, name="admin.html"
     )
 
-@app.get("/web/user_reservation/", response_class=HTMLResponse)
-async def read_item(request: Request, session: SessionDep):
+
+@app.get("/web/user_reservation/{date}", response_class=HTMLResponse)
+async def user_reservation(request: Request, date: str, session: SessionDep):
+    try:
+        selected_date = datetime.strptime(date, "%Y-%m-%d").date()
+    except ValueError:
+        return HTMLResponse(content="Invalid date format. Use YYYY-MM-DD", status_code=400)
     tables = session.exec(select(Table)).all()
+    reservations = session.exec(
+        select(Reservation).where(Reservation.reservation_date == selected_date)
+    ).all()
+
+    reserved_table_ids = {r.table_id for r in reservations}
+
+    tables_with_status = []
+    for table in tables:
+        is_reserved = table.id in reserved_table_ids
+        tables_with_status.append({
+            "id": table.id,
+            "name": table.name,
+            "reserved": is_reserved
+        })
+
     return templates.TemplateResponse(
-        request=request, name="user_reservation.html", context={"tables": tables}
+        request=request,
+        name="user_reservation.html",
+        context={"tables": tables_with_status, "date": selected_date}
     )
+
 
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
-
 
 
 @app.post("/user/")
@@ -84,6 +107,7 @@ def create_user(user: User, session: SessionDep) -> User:
     session.commit()
     session.refresh(user)
     return user
+
 
 @app.get("/user/")
 def read_users(
@@ -94,12 +118,14 @@ def read_users(
     users = session.exec(select(User).offset(offset).limit(limit)).all()
     return users
 
+
 @app.get("/user/{user_id}")
 def read_user(user_id: int, session: SessionDep) -> User:
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
 
 @app.delete("/user/{user_id}")
 def delete_user(user_id: int, session: SessionDep):
@@ -111,13 +137,13 @@ def delete_user(user_id: int, session: SessionDep):
     return {"ok": True}
 
 
-
 @app.post("/table/")
 def create_table(table: Table, session: SessionDep) -> Table:
     session.add(table)
     session.commit()
     session.refresh(table)
     return table
+
 
 @app.get("/table/")
 def read_tables(
@@ -128,12 +154,14 @@ def read_tables(
     tables = session.exec(select(Table).offset(offset).limit(limit)).all()
     return tables
 
+
 @app.get("/table/{table_id}")
 def read_table(table_id: int, session: SessionDep) -> Table:
     table = session.get(Table, table_id)
     if not table:
         raise HTTPException(status_code=404, detail="Table not found")
     return table
+
 
 @app.delete("/table/{table_id}")
 def delete_table(table_id: int, session: SessionDep):
@@ -145,7 +173,6 @@ def delete_table(table_id: int, session: SessionDep):
     return {"ok": True}
 
 
-
 @app.post("/reservation/")
 def create_reservation(reservation: Reservation, session: SessionDep) -> Reservation:
     reservation.reservation_date = datetime.strptime(reservation.reservation_date, "%Y-%m-%d").date()
@@ -153,6 +180,7 @@ def create_reservation(reservation: Reservation, session: SessionDep) -> Reserva
     session.commit()
     session.refresh(reservation)
     return reservation
+
 
 @app.get("/reservation/")
 def read_reservations(
@@ -163,12 +191,14 @@ def read_reservations(
     reservations = session.exec(select(Reservation).offset(offset).limit(limit)).all()
     return reservations
 
+
 @app.get("/reservation/{reservation_id}")
 def read_reservation(reservation_id: int, session: SessionDep) -> Reservation:
     reservation = session.get(Reservation, reservation_id)
     if not reservation:
         raise HTTPException(status_code=404, detail="Reservation not found")
     return reservation
+
 
 @app.delete("/reservation/{reservation_id}")
 def delete_reservation(reservation_id: int, session: SessionDep):
@@ -178,7 +208,6 @@ def delete_reservation(reservation_id: int, session: SessionDep):
     session.delete(reservation)
     session.commit()
     return {"ok": True}
-
 
 
 @app.get("/")
