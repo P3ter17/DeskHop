@@ -1,0 +1,9 @@
+main{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    #reservation_list{
+        margin: 20px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

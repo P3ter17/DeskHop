@@ -3,22 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <title>Reservation</title>
+    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
 </head>
 <body>
-  <h1 style="font-family: Calibri">Table reservations for {{date}}</h1>
-    {% for table in tables %}
-        <div style="margin: 20px; border: 1.5px solid #ef4130; padding: 10px;border-radius: 15px">
-            <p style="font-family: Calibri">Table id:{{table.id}}</p>
-            <p style="font-family: Calibri">Table name:{{table.name}}</p>
-            <p style="font-family: Calibri">
-                Status:
-                {% if table.reserved %}
-                    <span style="color: red;">Reserved</span>
-                {% else %}
-                    <span style="color: green;">Available</span>
-                {% endif %}
-            </p>
+    <h1 style="font-family: Calibri">Table reservations for {{date}}</h1>
+    <main>
+        <div id="reservation_list">
+            {% for table in tables %}
+                <div style="margin: 20px; border: 1.5px solid #ef4130; padding: 10px;border-radius: 15px">
+                    <p style="font-family: Calibri">Table id:{{table.id}}</p>
+                    <p style="font-family: Calibri">Table name:{{table.name}}</p>
+                    <p style="font-family: Calibri">
+                        Status:
+                        {% if table.reserved %}
+                            <span style="color: red;">Reserved</span>
+                        {% else %}
+                            <span style="color: green;">Available</span>
+                        {% endif %}
+                    </p>
+                    </div>
+            {% endfor %}
         </div>
-    {% endfor %}
+        <div>
+            <h2 style="font-family: Calibri">Create Reservations</h2>
+            <form id="reservationForm">
+                <label for="user_id">User ID:</label>
+                <input type="number" id="user_id_r" name="user_id" required>
+                <br>
+                <label for="table_id">Table ID:</label>
+                <input type="number" id="table_id_r" name="table_id" required>
+                <br>
+                <label for="date">Name:</label>
+                <input type="date" id="date_inf" name="date" required>
+                <br>
+                <button type="submit">Create reservation</button>
+            </form>
+            <div>
+                <p>Reservation ID: <span id="reservation_id"></span></p>
+                <p>User ID: <span id="user"></span></p>
+                <p>Table ID: <span id="table"></span></p>
+                <p>Date: <span id="date"></span></p>
+            </div>
+            <script>
+                document.getElementById('reservationForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const user_id = document.getElementById('user_id_r').value;
+                    const table_id = document.getElementById('table_id_r').value;
+                    const reservation_date = document.getElementById('date_inf').value;
+
+                    try {
+                        const response = await fetch('http://127.0.0.1:8000/reservation/', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ user_id, table_id, reservation_date })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Error API: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        console.log('Answer from API:', data);
+
+                        document.getElementById('reservation_id').innerText = data.id ?? 'N/A';
+                        document.getElementById('user').innerText = data.user_id ?? 'N/A';
+                        document.getElementById('table').innerText = data.table_id ?? 'N/A';
+                        document.getElementById('date').innerText = data.reservation_date ?? 'N/A';
+
+                    } catch (error) {
+                        alert("Error: " + error.message);
+                    }
+                });
+            </script>
+        </div>
+    </main>
 </body>
 </html>
